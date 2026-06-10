@@ -33,7 +33,7 @@ app.use(cors(corsOptionsDelegate));
 app.use(indexRoutes);
 
 // Error handling for undefined routes
-app.all("*", (req, res, next) => {
+app.all("/*splat", (req, res, next) => {
   console.log("this line is done")
   next(new AppError(404, `Can't find ${req.originalUrl} on this server!`));
 });

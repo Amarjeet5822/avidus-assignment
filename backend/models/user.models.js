@@ -1,22 +1,23 @@
 import mongoose from "mongoose";
+import historyPlugin from "../utils/historyPlugin.js";
 
 const userSchema = new mongoose.Schema(
   {
     first_name: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
     },
 
     last_name: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
     },
 
     username: {
       type: String,
-      required: true,
+      required: false,
       unique: true,
       lowercase: true,
       trim: true,
@@ -38,9 +39,10 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
-    is_admin: {
-      type: Boolean,
-      default: false,
+    role: {
+      type: String,
+      enum: ["User", "Admin"],
+      default: "User",
     },
 
     is_active: {
@@ -53,6 +55,8 @@ const userSchema = new mongoose.Schema(
     versionKey: false,
   }
 );
+
+userSchema.plugin(historyPlugin, { entityType: "User" });
 
 const User = mongoose.model("User", userSchema);
 export default User;
