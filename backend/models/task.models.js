@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import historyPlugin from "../utils/historyPlugin.js";
 
 const taskSchema = new mongoose.Schema(
   {
@@ -18,6 +19,7 @@ const taskSchema = new mongoose.Schema(
       ref: "User",
       required: true,
       index: true,
+      onDelete: "CASCADE",
     },
   },
   {
@@ -25,6 +27,8 @@ const taskSchema = new mongoose.Schema(
     versionKey: false,
   }
 );
+
+taskSchema.plugin(historyPlugin, { entityType: "Task" });
 
 const Task = mongoose.model("Task", taskSchema);
 export default Task;

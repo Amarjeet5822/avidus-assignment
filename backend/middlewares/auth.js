@@ -1,11 +1,11 @@
 import bcypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import TokenModel from "../models/token.models";
+import TokenModel from "../models/token.models.js";
 
 dotenv.config();
 
-const auth = async (req, res, next) => {
+const isAuthenticated = async (req, res, next) => {
   try {
     const token = req.cookies.refreshToken;
     if (!token) {
@@ -27,4 +27,4 @@ const auth = async (req, res, next) => {
   }
 };
 
-export default auth;
+export default isAuthenticated;

@@ -1,10 +1,9 @@
-import mongodb from 'mongodb';
+import mongoose from 'mongoose';
 
 const dbConnect = async () => {
     try {
-        const client = new mongodb.MongoClient(process.env.MONGO_URL);
-        await client.connect();
-        console.log("Connected to MongoDB");
+        await mongoose.connect(process.env.MONGO_URL);
+        console.log("Connected to MongoDB using Mongoose");
     } catch (error) {
         console.error("Error connecting to MongoDB:", error);
     }
