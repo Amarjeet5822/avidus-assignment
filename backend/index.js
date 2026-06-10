@@ -4,6 +4,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import indexRoutes from "./routes/index.route.js"
 import dbConnect from "./config/dbConnection.js"
+import AppError from "./utils/AppError.js"
 const app = express();
 dotenv.config();
 
@@ -13,7 +14,7 @@ app.use(express.urlencoded({ extended: false }));
 const cookieParserSecret = process.env.SECRET_KEY;
 app.use(cookieParser(cookieParserSecret));
 
-const whitelist = [process.env.FE_URL, process.env.DEPLOY_FE_URL];
+const whitelist = [process.env.FE_URL, process.env.DEPLOYED_FE_URL];
 
 const corsOptionsDelegate = (req, callback) => {
   if (whitelist.indexOf(req.header("Origin")) !== -1) {
@@ -31,6 +32,21 @@ app.use(cors(corsOptionsDelegate));
 
 app.use(indexRoutes);
 
+// Error handling for undefined routes
+app.all("*", (req, res, next) => {
+  console.log("this line is done")
+  next(new AppError(404, `Can't find ${req.originalUrl} on this server!`));
+});
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("Error:", err);
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({
+    status: err.status || "error",
+    message: err.message || "Internal Server Error",
+    ...err.data, // Merge extra data like isAuthenticated
+  });
+});
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
