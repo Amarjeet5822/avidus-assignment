@@ -29,7 +29,7 @@ const getTasks = async (req, res, next) => {
 
     const filter = role === "Admin" ? {} : { user_id: userId };
 
-    const tasks = await Task.find(filter);
+    const tasks = await Task.find(filter).populate("user_id", "first_name last_name email").sort({ updatedAt: -1 });
     res.status(200).json(tasks);
   } catch (error) {
     next(new AppError(500, error.message));

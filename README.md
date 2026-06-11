@@ -127,4 +127,89 @@ backend/
 
 ## 🎨 Frontend
 
-*(Frontend details will be added here)*
+This is a **Task Management Frontend Application** built with **React, Vite, and Tailwind CSS**. It provides a responsive, modern user interface to interact with the backend API.
+
+### 🚀 Features
+
+#### 🌟 Modern Tech Stack
+- **React + Vite**: Blazing fast development server and optimized production builds.
+- **Tailwind CSS**: Utility-first CSS framework for rapid UI development and responsive design.
+- **React Router DOM**: Seamless client-side routing for navigating between pages.
+
+#### 🔐 State Management & Authentication
+- **Redux Toolkit**: Centralized state management for Users, Tasks, and History Logs.
+- **Protected Routes**: Role-based access control. The Admin Dashboard is strictly protected and hidden from standard users.
+- **Cookie Auth**: Securely communicates with the backend using `withCredentials: true` via Axios.
+
+#### 📊 Admin Dashboard
+- **Analytics**: Overview of total users and pending/completed tasks.
+- **User Management**: Admins can view, edit (Name, Email, Role, Active/Inactive status), update passwords, and delete users inline.
+- **Task Monitoring**: Global view of all tasks across the application with inline editing capabilities.
+- **Activity Logs**: Rich, formatted audit tables showing exactly what fields changed (`Old Value ➔ New Value`) with exact timestamps.
+
+#### 🔔 User Experience
+- **Toast Notifications**: Interactive popup notifications using `react-hot-toast` for all CRUD operations.
+- **Inline Task Editing**: Users can easily click an edit icon to rename their tasks instantly on the homepage.
+
+### 🔧 Configuration
+
+Create a `.env` file in the `frontend` directory with the following variables:
+```env
+VITE_BE_URL=http://localhost:8080/api
+VITE_DEPLOYED_BE_URL=https://your-deployed-backend-url.com/api
+```
+
+### 🚢 Run the Frontend
+
+1. **Navigate to frontend and install dependencies:**
+```bash
+cd frontend
+npm install
+```
+
+2. **Start the development server:**
+```bash
+npm run dev
+```
+
+### 📦 Packages Used
+
+- **react** & **react-dom** — UI Library
+- **vite** — Next Generation Frontend Tooling
+- **react-router-dom** — Client-side routing
+- **@reduxjs/toolkit** & **react-redux** — State Management
+- **axios** — HTTP client for API requests
+- **tailwindcss** — Utility-first styling
+- **react-icons** — Beautiful SVG icons
+- **react-hot-toast** — Toast notifications
+
+### 📚 Folder Structure
+```
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── admin/
+│   │   │   ├── ActivityLogs.jsx
+│   │   │   ├── AnalyticsSection.jsx
+│   │   │   ├── TaskMonitoring.jsx
+│   │   │   └── UserManagement.jsx
+│   │   ├── AllRoutes.jsx
+│   │   └── Navbar.jsx
+│   ├── pages/
+│   │   ├── AdminDashboard.jsx
+│   │   ├── HomePage.jsx
+│   │   ├── LoginPage.jsx
+│   │   └── RegisterPage.jsx
+│   ├── store/
+│   │   ├── features/
+│   │   │   ├── authUser/authUserSlice.js
+│   │   │   ├── historyUser/historyUserSlice.js
+│   │   │   └── taskUser/taskUserSlice.js
+│   │   └── store.js
+│   ├── App.jsx
+│   ├── index.css
+│   └── main.jsx
+├── .env
+├── tailwind.config.js
+└── package.json
+```
