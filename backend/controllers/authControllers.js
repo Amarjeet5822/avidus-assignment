@@ -7,9 +7,16 @@ import AppError from "../utils/AppError.js";
 dotenv.config();
 
 const Login = async (req, res, next) => {
-  const { email } = req.body;
+  const { email, password } = req.body;
   try {
-    const matchingUser = await User.findOne({ email });
+    const matchingUser = await User.findOne({ email }).select('+password');
+    if (!matchingUser) {
+      return next(new AppError(404, "User not Found! Please register First"));
+    }
+    const isMatch = await comparePass(matchingUser, password);
+    if (!isMatch) {
+      return next(new AppError(400, "Invalid credential!"));
+    }
     const refreshToken = jwt.sign(
       { userId: matchingUser._id, user: matchingUser.username, role: matchingUser.role },
       process.env.SECRET_KEY,
@@ -18,7 +25,7 @@ const Login = async (req, res, next) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax", // `Strict` can block requests in some cases, `Lax` is better for authentication
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res
@@ -32,9 +39,9 @@ const Signup = async (req, res, next) => {
   const { name, email, password } = req.body;
   try {
     const hash = await bcrypt.hash(password, Number(process.env.SALT_ROUNDS));
-    const newUser = new User({ email, password: hash, first_name: name });
+    const newUser = new User({ email, password: hash, username: email, first_name: name });
     await newUser.save();
-    res.status(201).json({ message: "You have been successfully regitered!" });
+    res.status(201).json({ message: "You have been successfully registered!" });
   } catch (error) {
     next(new AppError(500, error.message));
   }
@@ -72,7 +79,7 @@ const Logout = async (req, res, next) => {
   }
 };
 
-const comparePass = async (user, password) => {
+async function comparePass(user, password) {
   try {
     const isPasswordMatching = await bcrypt.compare(password, user.password)
     return isPasswordMatching
@@ -90,11 +97,12 @@ const loginMiddleware = async (req, res, next) => {
   if (!regex.test(email)) {
     next(new AppError(400, "Invalid email! Please enter correct valid email"));
   }
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select('+password');
   if (!user) {
     next(new AppError(404, "User not Found! Please register First"));
   }
-  if (comparePass(user, password)) {
+  const isMatch = await comparePass(user, password);
+  if (isMatch) {
     next();
   } else {
     next(new AppError(400, "Invalid credential!"));

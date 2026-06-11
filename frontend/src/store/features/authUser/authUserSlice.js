@@ -1,7 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const bc_url = "http://localhost:8080/api";
+const bc_url = import.meta.env.MODE === 'production'
+  ? import.meta.env.VITE_DEPLOYED_BE_URL
+  : import.meta.env.VITE_BE_URL;
 
 export const loginUser = createAsyncThunk(
   "authUser/loginUser",
@@ -109,7 +111,7 @@ const initialState = {
 const authUserSlice = createSlice({
   name: "authUser",
   initialState,
-  reducers: { 
+  reducers: {
     resetState: (state) => {
       state.loading = false;
       state.error = null;

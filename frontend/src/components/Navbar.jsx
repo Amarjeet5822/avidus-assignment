@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../store/features/authUser/authUserSlice";
 
@@ -7,6 +7,7 @@ const Navbar = () => {
   const { isLogged, user } = useSelector((state) => state.authUser);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     dispatch(logoutUser()).then(() => {
@@ -32,8 +33,16 @@ const Navbar = () => {
           </>
         ) : (
           <>
-            <Link to="/login" className="hover:text-gray-300 mt-1">Login</Link>
-            <Link to="/register" className="bg-blue-500 px-3 py-1 rounded hover:bg-blue-600 transition">
+            <Link 
+              to="/login" 
+              className={location.pathname === "/login" ? "bg-blue-500 px-3 py-1 rounded hover:bg-blue-600 transition" : "px-3 py-1 hover:text-gray-300 transition"}
+            >
+              Login
+            </Link>
+            <Link 
+              to="/register" 
+              className={location.pathname === "/register" ? "bg-blue-500 px-3 py-1 rounded hover:bg-blue-600 transition" : "px-3 py-1 hover:text-gray-300 transition"}
+            >
               Register
             </Link>
           </>

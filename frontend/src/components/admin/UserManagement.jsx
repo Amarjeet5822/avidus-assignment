@@ -25,9 +25,9 @@ const UserManagement = () => {
 
   const startEdit = (user) => {
     setEditingId(user._id);
-    setEditForm({ 
-      name: user.first_name || "", 
-      email: user.email, 
+    setEditForm({
+      name: user.first_name || "",
+      email: user.email,
       role: user.role,
       password: "",
       is_active: user.is_active !== undefined ? user.is_active : true
@@ -79,25 +79,25 @@ const UserManagement = () => {
                 {editingId === user._id ? (
                   <>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <input 
-                        type="text" 
-                        value={editForm.name} 
-                        onChange={e => setEditForm({...editForm, name: e.target.value})}
+                      <input
+                        type="text"
+                        value={editForm.name}
+                        onChange={e => setEditForm({ ...editForm, name: e.target.value })}
                         className="border rounded px-2 py-1 w-full"
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <input 
-                        type="email" 
-                        value={editForm.email} 
-                        onChange={e => setEditForm({...editForm, email: e.target.value})}
+                      <input
+                        type="email"
+                        value={editForm.email}
+                        onChange={e => setEditForm({ ...editForm, email: e.target.value })}
                         className="border rounded px-2 py-1 w-full"
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <select 
-                        value={editForm.role} 
-                        onChange={e => setEditForm({...editForm, role: e.target.value})}
+                      <select
+                        value={editForm.role}
+                        onChange={e => setEditForm({ ...editForm, role: e.target.value })}
                         className="border rounded px-2 py-1 w-full"
                       >
                         <option value="User">User</option>
@@ -105,9 +105,9 @@ const UserManagement = () => {
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <select 
-                        value={editForm.is_active} 
-                        onChange={e => setEditForm({...editForm, is_active: e.target.value === 'true'})}
+                      <select
+                        value={editForm.is_active}
+                        onChange={e => setEditForm({ ...editForm, is_active: e.target.value === 'true' })}
                         className="border rounded px-2 py-1 w-full"
                       >
                         <option value="true">Active</option>
@@ -115,11 +115,11 @@ const UserManagement = () => {
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <input 
-                        type="password" 
+                      <input
+                        type="password"
                         placeholder="(Leave blank if unchanged)"
-                        value={editForm.password} 
-                        onChange={e => setEditForm({...editForm, password: e.target.value})}
+                        value={editForm.password}
+                        onChange={e => setEditForm({ ...editForm, password: e.target.value })}
                         className="border rounded px-2 py-1 w-full text-xs"
                       />
                     </td>
@@ -144,7 +144,7 @@ const UserManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 italic">Hidden</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-3">
-                      <button 
+                      <button
                         onClick={() => startEdit(user)}
                         className="text-blue-500 hover:text-blue-700 transition"
                         title="Edit User"
@@ -152,7 +152,7 @@ const UserManagement = () => {
                         <MdEdit size={20} />
                       </button>
                       {user.role !== 'Admin' && (
-                        <button 
+                        <button
                           onClick={() => handleDelete(user._id)}
                           className="text-red-500 hover:text-red-700 transition"
                           title="Delete User"

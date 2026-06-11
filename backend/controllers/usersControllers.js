@@ -84,7 +84,7 @@ const getUserList = async (req, res, next) => {
     if (role !== "Admin") {
       return next(new AppError(403, "You are not authorized to get user list!"));
     }
-    const users = await User.find({});
+    const users = await User.find({}).sort({ updatedAt: -1 });
     res.status(200).json(users);
   } catch (error) {
     next(new AppError(400, error?.message || "Internal Server Error"));

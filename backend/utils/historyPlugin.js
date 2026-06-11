@@ -34,9 +34,9 @@ const historyPlugin = (schema, options) => {
     next();
   });
 
-  schema.post("save", async function (doc, next) {
+  schema.post("save", async function (doc) {
     // Skip logging on CREATE
-    if (!this._original) return next();
+    if (!this._original) return;
 
     try {
       const oldObj = this._original;
@@ -57,16 +57,14 @@ const historyPlugin = (schema, options) => {
     } catch (err) {
       console.error("Error saving history:", err);
     }
-    next();
   });
 
-  schema.pre("findOneAndUpdate", async function (next) {
+  schema.pre("findOneAndUpdate", async function () {
     this._original = await this.model.findOne(this.getQuery());
-    next();
   });
 
-  schema.post("findOneAndUpdate", async function (doc, next) {
-    if (!doc || !this._original) return next();
+  schema.post("findOneAndUpdate", async function (doc) {
+    if (!doc || !this._original) return;
     try {
       const oldObj = this._original.toObject();
       const newObj = doc.toObject();
@@ -86,11 +84,10 @@ const historyPlugin = (schema, options) => {
     } catch (err) {
       console.error("Error saving history:", err);
     }
-    next();
   });
 
-  schema.post("findOneAndDelete", async function (doc, next) {
-    if (!doc) return next();
+  schema.post("findOneAndDelete", async function (doc) {
+    if (!doc) return;
     try {
       const historyDoc = new History({
         entity_type: entityType,
@@ -103,7 +100,6 @@ const historyPlugin = (schema, options) => {
     } catch (err) {
       console.error("Error saving history:", err);
     }
-    next();
   });
 };
 
