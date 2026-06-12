@@ -5,8 +5,8 @@ import historyRoutes from "./history.route.js";
 
 const indexRoutes = express.Router();
 
-indexRoutes.use("/api/users", userRoutes);
-indexRoutes.use("/api/tasks", taskRoutes);
-indexRoutes.use("/api/history", historyRoutes);
+indexRoutes.use("/users", userRoutes);
+indexRoutes.use("/tasks", taskRoutes);
+indexRoutes.use("/history", historyRoutes);
 
 export default indexRoutes;
