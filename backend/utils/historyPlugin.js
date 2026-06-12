@@ -35,7 +35,6 @@ const historyPlugin = (schema, options) => {
   });
 
   schema.post("save", async function (doc) {
-    // Skip logging on CREATE
     if (!this._original) return;
 
     try {
@@ -52,7 +51,9 @@ const historyPlugin = (schema, options) => {
           old_value: oldVal,
           new_value: newVal,
         });
-        await historyDoc.save();
+        historyDoc.save().catch(err => {
+          console.error("Error saving history:", err);
+        });
       }
     } catch (err) {
       console.error("Error saving history:", err);
@@ -79,7 +80,9 @@ const historyPlugin = (schema, options) => {
           old_value: oldVal,
           new_value: newVal,
         });
-        await historyDoc.save();
+        historyDoc.save().catch(err => {
+          console.error("Error saving history:", err);
+        });
       }
     } catch (err) {
       console.error("Error saving history:", err);
@@ -96,7 +99,9 @@ const historyPlugin = (schema, options) => {
         tag: "Deleted",
         old_value: doc.toObject(),
       });
-      await historyDoc.save();
+      historyDoc.save().catch(err => {
+        console.error("Error saving history:", err);
+      });
     } catch (err) {
       console.error("Error saving history:", err);
     }
