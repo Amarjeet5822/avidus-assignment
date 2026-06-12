@@ -8,7 +8,7 @@ import AppError from "./utils/AppError.js"
 const app = express();
 dotenv.config();
 
-app.use(express.json()); 
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 const cookieParserSecret = process.env.SECRET_KEY;
@@ -19,21 +19,21 @@ const whitelist = [process.env.FE_URL, process.env.DEPLOYED_FE_URL];
 const corsOptionsDelegate = (req, callback) => {
   if (whitelist.indexOf(req.header("Origin")) !== -1) {
     callback(null, {
-      origin: req.header("Origin"), 
+      origin: req.header("Origin"),
       credentials: true,
       methods: "GET,HEAD,PATCH,POST,PUT,DELETE",
       allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-    }); 
+    });
   } else {
-    callback(null, {origin: false});
+    callback(null, { origin: false });
   }
 };
 app.use(cors(corsOptionsDelegate));
 
-app.use(indexRoutes);
+app.use("/api", indexRoutes);
 
 // Error handling for undefined routes
-app.all("/*splat", (req, res, next) => {
+app.all("/api/*splat", (req, res, next) => {
   console.log("this line is done")
   next(new AppError(404, `Can't find ${req.originalUrl} on this server!`));
 });
