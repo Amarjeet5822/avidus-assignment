@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../store/features/authUser/authUserSlice";
+import ProfileModal from "./ProfileModal";
 
 const Navbar = () => {
   const { isLogged, user } = useSelector((state) => state.authUser);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const handleLogout = () => {
     dispatch(logoutUser()).then(() => {
@@ -27,6 +29,12 @@ const Navbar = () => {
             {user?.role === "Admin" && (
               <Link to="/admin" className="text-blue-400 hover:text-blue-300 font-semibold mt-1">Admin Dashboard</Link>
             )}
+            <button 
+              onClick={() => setIsProfileModalOpen(true)} 
+              className="text-gray-300 hover:text-white mt-1 transition"
+            >
+              Profile
+            </button>
             <button onClick={handleLogout} className="bg-red-500 px-3 py-1 rounded hover:bg-red-600 transition">
               Logout
             </button>
@@ -48,6 +56,9 @@ const Navbar = () => {
           </>
         )}
       </div>
+      
+      {/* Profile Modal */}
+      <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
     </nav>
   );
 };

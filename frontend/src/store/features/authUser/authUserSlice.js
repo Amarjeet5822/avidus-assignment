@@ -85,11 +85,11 @@ export const deleteUser = createAsyncThunk(
 
 export const updateUser = createAsyncThunk(
   "authUser/updateUser",
-  async ({ id, name, email, password, role, is_active }, { rejectWithValue }) => {
+  async ({ id, name, email, password, role, is_active, profile_image, educational_certificate }, { rejectWithValue }) => {
     try {
       const response = await axios.patch(
         `${bc_url}/users/${id}`,
-        { name, email, password, role, is_active },
+        { name, email, password, role, is_active, profile_image, educational_certificate },
         { withCredentials: true }
       );
       return response.data.user;

@@ -1,6 +1,8 @@
 import User from "../models/user.models.js";
 import AppError from "../utils/AppError.js";
 import bcrypt from "bcrypt";
+import File from "../models/file.models.js";
+import { deleteFromS3 } from "../config/s3.config.js";
 
 
 const deleteUser = async (req, res, next) => {
@@ -31,7 +33,7 @@ const deleteUser = async (req, res, next) => {
 }
 
 const updateUser = async (req, res, next) => {
-  const { name, password, email, role, is_active } = req.body;
+  const { name, password, email, role, is_active, profile_image, educational_certificate } = req.body;
   try {
     const userId = req.params.id;
     const { userId: reqUserId } = req.user;
@@ -48,6 +50,28 @@ const updateUser = async (req, res, next) => {
 
     const updates = { first_name: name, email };
     
+    if (profile_image && targetUser.profile_image?.toString() !== profile_image) {
+      updates.profile_image = profile_image;
+      if (targetUser.profile_image) {
+        const oldFile = await File.findById(targetUser.profile_image);
+        if (oldFile) {
+          await deleteFromS3(oldFile.s3_key).catch(e => console.error("S3 delete error:", e));
+          await File.findByIdAndDelete(targetUser.profile_image).catch(e => console.error("Mongo delete error:", e));
+        }
+      }
+    }
+    
+    if (educational_certificate && targetUser.educational_certificate?.toString() !== educational_certificate) {
+      updates.educational_certificate = educational_certificate;
+      if (targetUser.educational_certificate) {
+        const oldFile = await File.findById(targetUser.educational_certificate);
+        if (oldFile) {
+          await deleteFromS3(oldFile.s3_key).catch(e => console.error("S3 delete error:", e));
+          await File.findByIdAndDelete(targetUser.educational_certificate).catch(e => console.error("Mongo delete error:", e));
+        }
+      }
+    }
+    
     if (currentLoginUser.role === "Admin") {
       if (role) updates.role = role;
       if (is_active !== undefined) updates.is_active = is_active;
@@ -57,7 +81,9 @@ const updateUser = async (req, res, next) => {
       updates.password = await bcrypt.hash(password, Number(process.env.SALT_ROUNDS));
     }
     
-    const updatedUser = await User.findByIdAndUpdate({ _id: targetUser._id }, updates, { new: true });
+    const updatedUser = await User.findByIdAndUpdate({ _id: targetUser._id }, updates, { new: true })
+      .populate("profile_image")
+      .populate("educational_certificate");
     res.status(200).json({ message: "Updated successfully", user: updatedUser });
   } catch (error) {
     next(new AppError(400, error?.message || "Internal Server Error"));
@@ -71,7 +97,9 @@ const getUserDetails = async (req, res, next) => {
     if (user.role !== "Admin" && user.userId !== user_id) {
       return next(new AppError(403, "You are not authorized to view this user!"));
     }
-    const userDetail = await User.findOne({ _id: user_id });
+    const userDetail = await User.findOne({ _id: user_id })
+      .populate("profile_image")
+      .populate("educational_certificate");
     res.status(200).json(userDetail);
   } catch (error) {
     next(new AppError(400, error?.message || "Internal Server Error"));
@@ -84,7 +112,10 @@ const getUserList = async (req, res, next) => {
     if (role !== "Admin") {
       return next(new AppError(403, "You are not authorized to get user list!"));
     }
-    const users = await User.find({}).sort({ updatedAt: -1 });
+    const users = await User.find({})
+      .populate("profile_image")
+      .populate("educational_certificate")
+      .sort({ updatedAt: -1 });
     res.status(200).json(users);
   } catch (error) {
     next(new AppError(400, error?.message || "Internal Server Error"));

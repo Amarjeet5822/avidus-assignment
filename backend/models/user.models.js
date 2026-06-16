@@ -49,6 +49,14 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    profile_image: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "File",
+    },
+    educational_certificate: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "File",
+    },
   },
   {
     timestamps: true,

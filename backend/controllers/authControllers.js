@@ -9,7 +9,10 @@ dotenv.config();
 const Login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
-    const matchingUser = await User.findOne({ email }).select('+password');
+    const matchingUser = await User.findOne({ email })
+      .select('+password')
+      .populate("profile_image")
+      .populate("educational_certificate");
     if (!matchingUser) {
       return next(new AppError(404, "User not Found! Please register First"));
     }

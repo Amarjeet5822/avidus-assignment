@@ -3,6 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchUsers, deleteUser, updateUser } from "../../store/features/authUser/authUserSlice";
 import { MdDelete, MdEdit, MdCheck, MdClose } from "react-icons/md";
 import toast from "react-hot-toast";
+import axios from "axios";
+
+const bc_url = import.meta.env.MODE === 'production'
+  ? import.meta.env.VITE_DEPLOYED_BE_URL
+  : import.meta.env.VITE_BE_URL;
 
 const UserManagement = () => {
   const dispatch = useDispatch();
@@ -13,6 +18,15 @@ const UserManagement = () => {
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
+
+  const handleDownload = async (fileId) => {
+    try {
+      const response = await axios.get(`${bc_url}/files/download/${fileId}`, { withCredentials: true });
+      window.open(response.data.url, "_blank");
+    } catch (error) {
+      toast.error("Failed to download file");
+    }
+  };
 
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
@@ -70,6 +84,7 @@ const UserManagement = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">New Password</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Files</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -123,6 +138,9 @@ const UserManagement = () => {
                         className="border rounded px-2 py-1 w-full text-xs"
                       />
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      -
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2">
                       <button onClick={() => saveEdit(user._id)} className="text-green-600 hover:text-green-800" title="Save"><MdCheck size={20} /></button>
                       <button onClick={cancelEdit} className="text-gray-500 hover:text-gray-700" title="Cancel"><MdClose size={20} /></button>
@@ -143,6 +161,18 @@ const UserManagement = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 italic">Hidden</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm flex flex-col gap-1">
+                      {user.profile_image ? (
+                        <button onClick={() => handleDownload(user.profile_image._id || user.profile_image)} className="text-blue-500 hover:underline text-left">
+                          Image
+                        </button>
+                      ) : <span className="text-gray-400">No Image</span>}
+                      {user.educational_certificate ? (
+                        <button onClick={() => handleDownload(user.educational_certificate._id || user.educational_certificate)} className="text-blue-500 hover:underline text-left">
+                          Certificate
+                        </button>
+                      ) : <span className="text-gray-400">No Cert</span>}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-3">
                       <button
                         onClick={() => startEdit(user)}

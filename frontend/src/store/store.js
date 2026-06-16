@@ -9,5 +9,12 @@ export const store = configureStore({
     authUser: authUserReducer,
     taskUser: taskUserReducer,
     historyUser: historyUserReducer,
-  }
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['auth/login/fulfilled', 'auth/updateUser/fulfilled'],
+        ignoredPaths: ['authUser.user.profile_image', 'authUser.user.educational_certificate'],
+      },
+    }),
 });
