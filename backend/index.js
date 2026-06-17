@@ -44,7 +44,7 @@ app.use((err, req, res, next) => {
   res.status(statusCode).json({
     status: err.status || "error",
     message: err.message || "Internal Server Error",
-    ...err.data, // Merge extra data like isAuthenticated
+    ...err.data,
   });
 });
 

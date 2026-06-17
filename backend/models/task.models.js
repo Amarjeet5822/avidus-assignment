@@ -21,6 +21,15 @@ const taskSchema = new mongoose.Schema(
       index: true,
       onDelete: "CASCADE",
     },
+    data: {
+      type: Buffer,
+      default: null,
+    },
+
+    content_type: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

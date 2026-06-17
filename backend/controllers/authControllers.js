@@ -39,10 +39,22 @@ const Login = async (req, res, next) => {
   }
 };
 const Signup = async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { first_name, last_name, email, password } = req.body;
+  console.log("ommmm >>>>>>>>", first_name, last_name, email, password)
+  if (!first_name || !last_name || !email || !password) {
+    return next(new AppError(406, "Resource is unavailable!"));
+  }
+  const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!regex.test(email)) {
+    return next(new AppError(400, "Invalid email! Please enter correct valid email"));
+  }
+  const user = await User.findOne({ email });
+  if (user) {
+    return next(new AppError(409, "User already exist! Please login"));
+  }
   try {
     const hash = await bcrypt.hash(password, Number(process.env.SALT_ROUNDS));
-    const newUser = new User({ email, password: hash, username: email, first_name: name });
+    const newUser = new User({ email, password: hash, first_name, last_name });
     await newUser.save();
     res.status(201).json({ message: "You have been successfully registered!" });
   } catch (error) {
@@ -113,9 +125,9 @@ const loginMiddleware = async (req, res, next) => {
 
 };
 const registerMiddleware = async (req, res, next) => {
-  const { email, name, password } = req.body;
+  const { email, first_name, last_name, password } = req.body;
   try {
-    if (!email || !name || !password) {
+    if (!email || !first_name || !last_name || !password) {
       next(new AppError(406, "resource is unavailable!"));
     }
     const user = await User.findOne({ email });
