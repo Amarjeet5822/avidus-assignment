@@ -20,17 +20,27 @@ const Navbar = () => {
   return (
     <nav className="bg-gray-800 p-4 text-white flex justify-between items-center shadow-md sticky top-0 z-50">
       <div className="text-xl font-bold">
-        <Link to="/">Task Manager</Link>
+        <Link to="/" >Task Manager</Link>
       </div>
       <div className="flex gap-4">
         {isLogged ? (
           <>
-            <Link to="/" className="hover:text-gray-300 mt-1">Home</Link>
+            <Link
+              to="/"
+              className={`mt-[6px] font-semibold ${location.pathname === "/" ? "text-blue-400 hover:text-blue-300" : "text-gray-300 hover:text-white transition"}`}
+            >
+              Home
+            </Link>
             {user?.role === "Admin" && (
-              <Link to="/admin" className="text-blue-400 hover:text-blue-300 font-semibold mt-1">Admin Dashboard</Link>
+              <Link
+                to="/admin"
+                className={`mt-[6px] font-semibold ${location.pathname === "/admin" ? "text-blue-400 hover:text-blue-300" : "text-gray-300 hover:text-white transition"}`}
+              >
+                Admin Dashboard
+              </Link>
             )}
-            <button 
-              onClick={() => setIsProfileModalOpen(true)} 
+            <button
+              onClick={() => setIsProfileModalOpen(true)}
               className="text-gray-300 hover:text-white mt-1 transition"
             >
               Profile
@@ -41,14 +51,14 @@ const Navbar = () => {
           </>
         ) : (
           <>
-            <Link 
-              to="/login" 
+            <Link
+              to="/login"
               className={location.pathname === "/login" ? "bg-blue-500 px-3 py-1 rounded hover:bg-blue-600 transition" : "px-3 py-1 hover:text-gray-300 transition"}
             >
               Login
             </Link>
-            <Link 
-              to="/register" 
+            <Link
+              to="/register"
               className={location.pathname === "/register" ? "bg-blue-500 px-3 py-1 rounded hover:bg-blue-600 transition" : "px-3 py-1 hover:text-gray-300 transition"}
             >
               Register
@@ -56,7 +66,7 @@ const Navbar = () => {
           </>
         )}
       </div>
-      
+
       {/* Profile Modal */}
       <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
     </nav>

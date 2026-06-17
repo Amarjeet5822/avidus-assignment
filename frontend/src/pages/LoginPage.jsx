@@ -58,6 +58,7 @@ const LoginPage = () => {
           <div className="mb-6">
             <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
             <input
+              type="password"
               className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 bg-gray-50"
               {...register("password")}
             />
