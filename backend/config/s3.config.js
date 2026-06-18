@@ -19,6 +19,7 @@ export const uploadToS3 = async (fileBuffer, fileName, mimetype) => {
     Key: fileName,
     Body: fileBuffer,
     ContentType: mimetype,
+    ACL: "public-read"
   });
 
   try {
@@ -30,12 +31,18 @@ export const uploadToS3 = async (fileBuffer, fileName, mimetype) => {
   }
 };
 
-export const getPresignedUrl = async (fileName) => {
+export const getPresignedUrl = async (fileName, downloadName = null) => {
   const bucketName = process.env.S3_BUCKET_NAME;
-  const command = new GetObjectCommand({
+  const params = {
     Bucket: bucketName,
     Key: fileName,
-  });
+  };
+
+  if (downloadName) {
+    params.ResponseContentDisposition = `attachment; filename="${downloadName}"`;
+  }
+
+  const command = new GetObjectCommand(params);
 
   try {
     // URL expires in 1 hour (3600 seconds)
@@ -52,6 +59,7 @@ export const getPresignedUploadUrl = async (s3Key, mimeType) => {
     Bucket: bucketName,
     Key: s3Key,
     ContentType: mimeType,
+    ACL: "public-read",
   });
 
   try {

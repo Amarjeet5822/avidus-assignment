@@ -126,7 +126,7 @@ export const getDownloadUrl = async (req, res, next) => {
       return next(new AppError(403, "Not authorized"));
     }
 
-    const url = await getPresignedUrl(item.key);
+    const url = await getPresignedUrl(item.key, item.name);
     res.status(200).json({ url, name: item.name });
   } catch (error) {
     next(new AppError(500, error.message));
