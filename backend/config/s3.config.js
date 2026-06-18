@@ -46,6 +46,22 @@ export const getPresignedUrl = async (fileName) => {
   }
 };
 
+export const getPresignedUploadUrl = async (s3Key, mimeType) => {
+  const bucketName = process.env.S3_BUCKET_NAME;
+  const command = new PutObjectCommand({
+    Bucket: bucketName,
+    Key: s3Key,
+    ContentType: mimeType,
+  });
+
+  try {
+    return await getSignedUrl(s3Client, command, { expiresIn: 300 });
+  } catch (error) {
+    console.error("Error generating presigned upload URL:", error);
+    throw new Error(`Failed to generate upload link: ${error.message}`);
+  }
+};
+
 export const deleteFromS3 = async (fileName) => {
   const bucketName = process.env.S3_BUCKET_NAME;
   const command = new DeleteObjectCommand({

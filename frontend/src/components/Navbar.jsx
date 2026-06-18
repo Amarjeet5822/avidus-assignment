@@ -39,6 +39,12 @@ const Navbar = () => {
                 Admin Dashboard
               </Link>
             )}
+            <Link
+              to="/drive"
+              className={`mt-[6px] font-semibold ${location.pathname.startsWith("/drive") ? "text-blue-400 hover:text-blue-300" : "text-gray-300 hover:text-white transition"}`}
+            >
+              Drive
+            </Link>
             <button
               onClick={() => setIsProfileModalOpen(true)}
               className="text-gray-300 hover:text-white mt-1 transition"
