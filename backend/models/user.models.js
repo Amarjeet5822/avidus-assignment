@@ -19,18 +19,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: false,
       unique: true,
+      sparse: true,
       lowercase: true,
       trim: true,
       index: true,
     },
 
     email: {
-        type: String,
-        required: true,
-        unique: true,
-        lowercase: true,
-        trim: true,
-        index: true,
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      index: true,
     },
 
     password: {
@@ -48,6 +49,14 @@ const userSchema = new mongoose.Schema(
     is_active: {
       type: Boolean,
       default: true,
+    },
+    profile_image: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "File",
+    },
+    educational_certificate: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "File",
     },
   },
   {

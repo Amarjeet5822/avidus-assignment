@@ -9,7 +9,10 @@ dotenv.config();
 const Login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
-    const matchingUser = await User.findOne({ email }).select('+password');
+    const matchingUser = await User.findOne({ email })
+      .select('+password')
+      .populate("profile_image")
+      .populate("educational_certificate");
     if (!matchingUser) {
       return next(new AppError(404, "User not Found! Please register First"));
     }
@@ -17,17 +20,29 @@ const Login = async (req, res, next) => {
     if (!isMatch) {
       return next(new AppError(400, "Invalid credential!"));
     }
+    const accessToken = jwt.sign(
+      { userId: matchingUser._id, user: matchingUser.username, role: matchingUser.role },
+      process.env.SECRET_KEY,
+      { expiresIn: "15m" }
+    );
     const refreshToken = jwt.sign(
       { userId: matchingUser._id, user: matchingUser.username, role: matchingUser.role },
       process.env.SECRET_KEY,
       { expiresIn: "7d" }
     );
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+      maxAge: 15 * 60 * 1000,
+    });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+    delete matchingUser?.password;
     res
       .status(200)
       .json({ message: "Login Successfull!", refreshToken, matchingUser });
@@ -36,10 +51,22 @@ const Login = async (req, res, next) => {
   }
 };
 const Signup = async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { first_name, last_name, email, password } = req.body;
+  console.log("ommmm >>>>>>>>", first_name, last_name, email, password)
+  if (!first_name || !last_name || !email || !password) {
+    return next(new AppError(406, "Resource is unavailable!"));
+  }
+  const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!regex.test(email)) {
+    return next(new AppError(400, "Invalid email! Please enter correct valid email"));
+  }
+  const user = await User.findOne({ email });
+  if (user) {
+    return next(new AppError(409, "User already exist! Please login"));
+  }
   try {
     const hash = await bcrypt.hash(password, Number(process.env.SALT_ROUNDS));
-    const newUser = new User({ email, password: hash, username: email, first_name: name });
+    const newUser = new User({ email, password: hash, first_name, last_name });
     await newUser.save();
     res.status(201).json({ message: "You have been successfully registered!" });
   } catch (error) {
@@ -68,6 +95,11 @@ const Logout = async (req, res, next) => {
     });
     await blockedToken.save();
 
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+    });
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -110,9 +142,9 @@ const loginMiddleware = async (req, res, next) => {
 
 };
 const registerMiddleware = async (req, res, next) => {
-  const { email, name, password } = req.body;
+  const { email, first_name, last_name, password } = req.body;
   try {
-    if (!email || !name || !password) {
+    if (!email || !first_name || !last_name || !password) {
       next(new AppError(406, "resource is unavailable!"));
     }
     const user = await User.findOne({ email });

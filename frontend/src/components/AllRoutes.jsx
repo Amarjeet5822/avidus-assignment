@@ -5,6 +5,7 @@ import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import AdminDashboard from "../pages/AdminDashboard";
+import DrivePage from "../pages/DrivePage";
 
 function AllRoutes() {
   const { isLogged, user } = useSelector((state) => state.authUser);
@@ -15,6 +16,10 @@ function AllRoutes() {
       <Route path="/login" element={!isLogged ? <LoginPage /> : <Navigate to="/" />} />
       <Route path="/register" element={!isLogged ? <RegisterPage /> : <Navigate to="/" />} />
       
+      {/* Drive routes */}
+      <Route path="/drive" element={isLogged ? <DrivePage /> : <Navigate to="/login" />} />
+      <Route path="/drive/:folderId" element={isLogged ? <DrivePage /> : <Navigate to="/login" />} />
+
       {/* Admin routes protected by role */}
       <Route 
         path="/admin/*" 

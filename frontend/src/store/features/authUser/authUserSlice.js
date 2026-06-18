@@ -23,11 +23,11 @@ export const loginUser = createAsyncThunk(
 
 export const registerUser = createAsyncThunk(
   "authUser/registerUser",
-  async ({ email, password, name }, { rejectWithValue }) => {
+  async ({ email, password, first_name, last_name }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
         `${bc_url}/users/signup`,
-        { name, email, password },
+        { first_name, last_name, email, password },
         { withCredentials: true }
       );
       return response.data;
@@ -76,7 +76,7 @@ export const deleteUser = createAsyncThunk(
         `${bc_url}/users/${id}`,
         { withCredentials: true }
       );
-      return id; // return deleted id
+      return id;
     } catch (error) {
       return rejectWithValue(error.response?.data || "failed to Delete user!")
     }
@@ -85,11 +85,11 @@ export const deleteUser = createAsyncThunk(
 
 export const updateUser = createAsyncThunk(
   "authUser/updateUser",
-  async ({ id, name, email, password, role, is_active }, { rejectWithValue }) => {
+  async ({ id, name, email, password, role, is_active, profile_image, educational_certificate }, { rejectWithValue }) => {
     try {
       const response = await axios.patch(
         `${bc_url}/users/${id}`,
-        { name, email, password, role, is_active },
+        { name, email, password, role, is_active, profile_image, educational_certificate },
         { withCredentials: true }
       );
       return response.data.user;

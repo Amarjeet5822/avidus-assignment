@@ -22,12 +22,25 @@ export const fetchTasks = createAsyncThunk(
 
 export const createTask = createAsyncThunk(
   "taskUser/createTask",
-  async ({ name, is_completed }, { rejectWithValue }) => {
+  async ({ name, is_completed, image }, { rejectWithValue }) => {
     try {
+      let data;
+      let headers = { withCredentials: true };
+
+      if (image) {
+        data = new FormData();
+        data.append("name", name);
+        data.append("is_completed", is_completed);
+        data.append("image", image);
+        headers['Content-Type'] = 'multipart/form-data';
+      } else {
+        data = { name, is_completed };
+      }
+
       const response = await axios.post(
         `${bc_url}/tasks`,
-        { name, is_completed },
-        { withCredentials: true }
+        data,
+        headers
       );
       return response.data.task;
     } catch (error) {
@@ -38,12 +51,25 @@ export const createTask = createAsyncThunk(
 
 export const updateTask = createAsyncThunk(
   "taskUser/updateTask",
-  async ({ id, name, is_completed }, { rejectWithValue }) => {
+  async ({ id, name, is_completed, image }, { rejectWithValue }) => {
     try {
+      let data;
+      let headers = { withCredentials: true };
+
+      if (image) {
+        data = new FormData();
+        data.append("name", name);
+        data.append("is_completed", is_completed);
+        data.append("image", image);
+        headers['Content-Type'] = 'multipart/form-data';
+      } else {
+        data = { name, is_completed };
+      }
+
       const response = await axios.patch(
         `${bc_url}/tasks/${id}`,
-        { name, is_completed },
-        { withCredentials: true }
+        data,
+        headers
       );
       return response.data.task;
     } catch (error) {
