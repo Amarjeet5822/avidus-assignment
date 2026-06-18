@@ -1,5 +1,7 @@
 # Avidus Assignment
 
+🚀 **Live Application:** [https://avidus-pro.netlify.app](https://avidus-pro.netlify.app)
+
 This repository contains the full-stack Avidus Assignment application, consisting of an Express.js backend, React.js frontend, and MongoDB database.
 
 ---
@@ -19,10 +21,15 @@ This is a **Task Management Backend Application** built with **Node.js, Express,
 - **Role-Based Access Control**: Supports `Admin` and `User` roles.
 
 #### 🗒️ Task Management
-- **Create a Task**: Add new tasks with a name and completion status.
+- **Create a Task**: Add new tasks with a name, completion status, and optional S3 image attachments.
 - **Read Tasks**: Fetch tasks (Admins can view all tasks, users can view their own).
 - **Update a Task**: Edit existing tasks and mark them as completed.
 - **Delete a Task**: Remove a task.
+
+#### ☁️ Cloud Drive Storage (Google Drive Clone)
+- **Hierarchical Storage**: Infinite nesting of folders and files using a single robust MongoDB schema.
+- **AWS S3 Integration**: Secure, scalable direct-to-S3 file uploads using Pre-signed PUT/GET URLs.
+- **Advanced Operations**: Support for recursive soft-deletes, moving files between folders (with circular dependency protection), and renaming.
 
 #### 📜 History & Audit Logging
 - **Reusable History Plugin**: Automatically tracks `CREATE`, `UPDATE`, and `DELETE` actions on `User` and `Task` models using Mongoose hooks.
@@ -41,10 +48,19 @@ This is a **Task Management Backend Application** built with **Node.js, Express,
 
 #### Task Routes
 - **GET /api/tasks** — Get all tasks for the logged-in user (Admin gets all)
-- **POST /api/tasks** — Create a new task
+- **POST /api/tasks** — Create a new task (supports optional image uploads to S3)
 - **GET /api/tasks/:id** — Get a specific task
 - **PATCH /api/tasks/:id** — Update a task by ID
 - **DELETE /api/tasks/:id** — Delete a task by ID
+
+#### Drive Routes
+- **GET /api/drive** — Get contents of a folder
+- **POST /api/drive/folder** — Create a new folder
+- **POST /api/drive/upload/init** — Initialize a direct S3 file upload
+- **GET /api/drive/:id/download** — Get a pre-signed S3 download URL
+- **PATCH /api/drive/:id/rename** — Rename a file or folder
+- **PATCH /api/drive/:id/move** — Move a file or folder
+- **DELETE /api/drive/:id** — Soft delete a file or folder recursively
 
 #### History Routes
 - **GET /api/history** — Get history/audit logs (Admin only)
@@ -137,9 +153,15 @@ This is a **Task Management Frontend Application** built with **React, Vite, and
 - **React Router DOM**: Seamless client-side routing for navigating between pages.
 
 #### 🔐 State Management & Authentication
-- **Redux Toolkit**: Centralized state management for Users, Tasks, and History Logs.
+- **Redux Toolkit**: Centralized state management for Users, Tasks, History Logs, and Drive Storage.
 - **Protected Routes**: Role-based access control. The Admin Dashboard is strictly protected and hidden from standard users.
 - **Cookie Auth**: Securely communicates with the backend using `withCredentials: true` via Axios.
+
+#### 📁 Cloud Drive UI
+- **Responsive Layouts**: Toggle seamlessly between dynamic Grid and List views for viewing stored files.
+- **Breadcrumb Navigation**: Intuitive navigation for traversing deeply nested folders.
+- **Image Previews & Downloads**: Instant full-screen modal previews for images and seamless forced programmatic downloading using S3 `Content-Disposition`.
+- **Form Validation**: Fully integrated `react-hook-form` and `zod` for robust schema validation when creating or renaming items.
 
 #### 📊 Admin Dashboard
 - **Analytics**: Overview of total users and pending/completed tasks.
@@ -178,6 +200,7 @@ npm run dev
 - **vite** — Next Generation Frontend Tooling
 - **react-router-dom** — Client-side routing
 - **@reduxjs/toolkit** & **react-redux** — State Management
+- **react-hook-form** & **zod** — Form Validation and Schema Management
 - **axios** — HTTP client for API requests
 - **tailwindcss** — Utility-first styling
 - **react-icons** — Beautiful SVG icons

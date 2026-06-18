@@ -145,7 +145,13 @@ const DrivePage = () => {
   const handleDownload = async (item) => {
     try {
       const result = await dispatch(getDownloadUrl(item._id)).unwrap();
-      window.open(result.url, "_blank");
+      const a = document.createElement("a");
+      a.href = result.url;
+      // The backend now sets Content-Disposition attachment, so it will download automatically.
+      a.download = item.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     } catch (err) {
       toast.error(err.message || "Download failed");
     }
