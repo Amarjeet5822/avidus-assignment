@@ -25,7 +25,6 @@ const taskSchema = new mongoose.Schema(
       type: Buffer,
       default: null,
     },
-
     content_type: {
       type: String,
       default: null,

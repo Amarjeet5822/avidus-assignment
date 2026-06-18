@@ -20,17 +20,29 @@ const Login = async (req, res, next) => {
     if (!isMatch) {
       return next(new AppError(400, "Invalid credential!"));
     }
+    const accessToken = jwt.sign(
+      { userId: matchingUser._id, user: matchingUser.username, role: matchingUser.role },
+      process.env.SECRET_KEY,
+      { expiresIn: "15m" }
+    );
     const refreshToken = jwt.sign(
       { userId: matchingUser._id, user: matchingUser.username, role: matchingUser.role },
       process.env.SECRET_KEY,
       { expiresIn: "7d" }
     );
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+      maxAge: 15 * 60 * 1000,
+    });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+    delete matchingUser?.password;
     res
       .status(200)
       .json({ message: "Login Successfull!", refreshToken, matchingUser });
@@ -83,6 +95,11 @@ const Logout = async (req, res, next) => {
     });
     await blockedToken.save();
 
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+    });
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
