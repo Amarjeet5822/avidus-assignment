@@ -5,7 +5,7 @@ import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import AdminDashboard from "../pages/AdminDashboard";
-import DrivePage from "../pages/DrivePage";
+import DrivePage from "../pages/drive/DrivePage";
 
 function AllRoutes() {
   const { isLogged, user } = useSelector((state) => state.authUser);
