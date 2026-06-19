@@ -19,7 +19,7 @@ export const uploadToS3 = async (fileBuffer, fileName, mimetype) => {
     Key: fileName,
     Body: fileBuffer,
     ContentType: mimetype,
-    ACL: "public-read"
+    // ACL: "public-read"
   });
 
   try {
@@ -59,7 +59,7 @@ export const getPresignedUploadUrl = async (s3Key, mimeType) => {
     Bucket: bucketName,
     Key: s3Key,
     ContentType: mimeType,
-    ACL: "public-read",
+    // ACL: "public-read",
   });
 
   try {
