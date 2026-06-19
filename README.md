@@ -236,3 +236,107 @@ frontend/
 ├── tailwind.config.js
 └── package.json
 ```
+
+---
+
+## 📂 Drive — Recursive Folder Upload Feature
+
+One of the highlights of the Cloud Drive module is the **recursive folder upload** system, which allows users to upload an entire local directory and have its exact hierarchy recreated inside the drive — automatically.
+
+---
+
+### ✨ How It Works
+
+When a user uploads a folder (via drag-and-drop or the file picker), the frontend:
+
+1. **Reads the entire folder tree** recursively using the browser's `FileSystemDirectoryEntry` API.
+2. **Counts all nodes** (folders + files) upfront to power the real-time progress bar.
+3. **Walks the tree** depth-first — creating each sub-folder in the backend before uploading the files inside it.
+
+```
+Dropped Folder: ProjectX/
+  ├── docs/
+  │   └── design.pdf
+  ├── src/
+  │   ├── index.js
+  │   └── utils/
+  │       └── helpers.js
+  └── README.md
+
+Result in Drive:
+  ProjectX/         → POST /api/drive/folder  (parentId = currentFolder)
+    docs/           → POST /api/drive/folder  (parentId = ProjectX._id)
+      design.pdf    → POST /api/drive/upload + S3 PUT
+    src/            → POST /api/drive/folder  (parentId = ProjectX._id)
+      index.js      → POST /api/drive/upload + S3 PUT
+      utils/        → POST /api/drive/folder  (parentId = src._id)
+        helpers.js  → POST /api/drive/upload + S3 PUT
+    README.md       → POST /api/drive/upload + S3 PUT
+```
+
+> **No new backend endpoints needed** — the feature reuses the existing `POST /api/drive/folder` and `POST /api/drive/upload` APIs.
+
+---
+
+### 🖱️ Three Ways to Upload
+
+| Method | How |
+|---|---|
+| **Drag & Drop onto the page** | Drag a local folder anywhere on the Drive page. A full-page overlay confirms the drop target. |
+| **Drag & Drop onto a folder card** | Drag a local folder directly onto an existing Drive folder card or row. The card highlights with a "Drop into `<name>`" label. |
+| **Click the Upload Zone** | A compact `[ Upload Files ] | [ Upload Folder ]` bar lets users click to open the OS file manager — supports multi-file selection and whole-folder selection (`webkitdirectory`). |
+
+---
+
+### 📊 Real-Time Progress Bar
+
+During a folder upload, the header shows a live progress bar:
+
+```
+📂 Uploading folder structure...       14 / 37
+[████████████░░░░░░░░░░░░░░░░░░░░░░░░]
+```
+
+- Counts **every folder created and every file uploaded** as a single unit of progress.
+- Automatically dismisses when the upload is complete.
+
+---
+
+### 🧩 Modular Component Architecture
+
+The Drive module is fully decomposed into small, single-responsibility components:
+
+```
+frontend/src/pages/drive/
+├── DrivePage.jsx                   ← Orchestrator: holds all state & Redux actions
+├── utils.js                        ← Shared helpers (formatSize, getFileIcon)
+├── utils/
+│   └── folderUploadUtils.js        ← Core recursive engine
+│       ├── readDirectory()             Reads a drag-and-drop FileSystemDirectoryEntry tree
+│       ├── countNodes()               Counts total items for progress tracking
+│       ├── uploadTree()               Uploads a drag-and-drop tree recursively
+│       ├── buildTreeFromFileList()    Reconstructs a tree from webkitdirectory FileList
+│       └── uploadTreeFromFileList()   Uploads a file-picker folder tree recursively
+└── components/
+    ├── DriveHeader.jsx             ← Title, view toggle, upload buttons, progress bar
+    ├── DriveBreadcrumbs.jsx        ← Path navigation (Home > Folder > Sub)
+    ├── NewFolderForm.jsx           ← Inline form for creating a new folder
+    ├── MoveBanner.jsx              ← "Moving <item>" action bar
+    ├── DropZoneOverlay.jsx         ← Full-page drag-over visual cue
+    ├── UploadZone.jsx              ← Compact clickable upload bar (files + folder)
+    ├── DriveGridView.jsx           ← Grid layout container
+    ├── DriveItemCard.jsx           ← Individual grid card (with drop target support)
+    ├── DriveListView.jsx           ← List layout container
+    ├── DriveItemRow.jsx            ← Individual list row (with drop target support)
+    └── ImagePreviewModal.jsx       ← Full-screen image preview overlay
+```
+
+---
+
+### 🔑 Key Technical Details
+
+- **`webkitGetAsEntry()`** — Used on drag events to get `FileSystemDirectoryEntry` objects, enabling full recursive directory traversal.
+- **Batch `readEntries()` loop** — The browser's `readEntries()` only returns up to 100 entries per call. The implementation loops until an empty batch is returned, guaranteeing large directories are read completely.
+- **`webkitdirectory` input attribute** — Used on the hidden `<input>` in `UploadZone` to open the OS folder picker. Returns a flat `FileList` with `webkitRelativePath` on each file, which `buildTreeFromFileList()` reconstructs into a proper tree.
+- **Per-card drop counter ref** — Each `DriveItemCard` and `DriveItemRow` uses a `dragCounterRef` to prevent the overlay from flickering when the drag moves between child elements.
+- **Double-click guard** — `lastClickedRef` with a 500ms cooldown prevents a rapid double-click from navigating into a folder twice and duplicating the breadcrumb path.
