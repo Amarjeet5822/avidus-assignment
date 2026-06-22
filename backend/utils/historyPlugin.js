@@ -34,77 +34,73 @@ const historyPlugin = (schema, options) => {
     next();
   });
 
-  schema.post("save", async function (doc) {
+  // After save: write history AFTER response — never blocks the request
+  schema.post("save", function (doc) {
     if (!this._original) return;
-
-    try {
-      const oldObj = this._original;
-      const newObj = doc.toObject();
-      const { hasChanges, oldVal, newVal } = getDiff(oldObj, newObj);
-
-      if (hasChanges) {
-        const historyDoc = new History({
-          entity_type: entityType,
-          entity_id: doc._id,
-          action: "UPDATE",
-          tag: "Updated",
-          old_value: oldVal,
-          new_value: newVal,
-        });
-        historyDoc.save().catch(err => {
-          console.error("Error saving history:", err);
-        });
+    const original = this._original;
+    setImmediate(async () => {
+      try {
+        const { hasChanges, oldVal, newVal } = getDiff(original, doc.toObject());
+        if (hasChanges) {
+          await History.create({
+            entity_type: entityType,
+            entity_id: doc._id,
+            action: "UPDATE",
+            tag: "Updated",
+            old_value: oldVal,
+            new_value: newVal,
+          });
+        }
+      } catch (err) {
+        console.error("Error saving history (post-save):", err);
       }
-    } catch (err) {
-      console.error("Error saving history:", err);
-    }
+    });
   });
 
+  // Capture snapshot before findOneAndUpdate — use lean() for speed (no mongoose hydration)
   schema.pre("findOneAndUpdate", async function () {
-    this._original = await this.model.findOne(this.getQuery());
+    this._original = await this.model.findOne(this.getQuery()).lean();
   });
 
-  schema.post("findOneAndUpdate", async function (doc) {
+  // After findOneAndUpdate: write history AFTER response — never blocks the request
+  schema.post("findOneAndUpdate", function (doc) {
     if (!doc || !this._original) return;
-    try {
-      const oldObj = this._original.toObject();
-      const newObj = doc.toObject();
-      const { hasChanges, oldVal, newVal } = getDiff(oldObj, newObj);
+    const original = this._original;
+    setImmediate(async () => {
+      try {
+        const { hasChanges, oldVal, newVal } = getDiff(original, doc.toObject());
+        if (hasChanges) {
+          await History.create({
+            entity_type: entityType,
+            entity_id: doc._id,
+            action: "UPDATE",
+            tag: "Updated",
+            old_value: oldVal,
+            new_value: newVal,
+          });
+        }
+      } catch (err) {
+        console.error("Error saving history (post-findOneAndUpdate):", err);
+      }
+    });
+  });
 
-      if (hasChanges) {
-        const historyDoc = new History({
+  // After delete: write history AFTER response — never blocks the request
+  schema.post("findOneAndDelete", function (doc) {
+    if (!doc) return;
+    setImmediate(async () => {
+      try {
+        await History.create({
           entity_type: entityType,
           entity_id: doc._id,
-          action: "UPDATE",
-          tag: "Updated",
-          old_value: oldVal,
-          new_value: newVal,
+          action: "DELETE",
+          tag: "Deleted",
+          old_value: doc.toObject(),
         });
-        historyDoc.save().catch(err => {
-          console.error("Error saving history:", err);
-        });
+      } catch (err) {
+        console.error("Error saving history (post-delete):", err);
       }
-    } catch (err) {
-      console.error("Error saving history:", err);
-    }
-  });
-
-  schema.post("findOneAndDelete", async function (doc) {
-    if (!doc) return;
-    try {
-      const historyDoc = new History({
-        entity_type: entityType,
-        entity_id: doc._id,
-        action: "DELETE",
-        tag: "Deleted",
-        old_value: doc.toObject(),
-      });
-      historyDoc.save().catch(err => {
-        console.error("Error saving history:", err);
-      });
-    } catch (err) {
-      console.error("Error saving history:", err);
-    }
+    });
   });
 };
 
